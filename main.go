@@ -12,12 +12,12 @@ func main() {
 	config := LoadConfig()
 
 	tMap := CreateRandomTileMap(config)
-	renderedMap := tMap.RenderedMap()
+	renderedMapString := tMap.RenderedMap().convertRenderedMapToString()
 
 	if config.fileOutput != "" {
-		printToFile(renderedMap, config.fileOutput)
+		printToFile(renderedMapString, config.fileOutput)
 	} else {
-		printToConsole(renderedMap)
+		printToConsole(renderedMapString)
 	}
 }
 

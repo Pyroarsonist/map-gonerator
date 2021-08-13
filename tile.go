@@ -1,17 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
 
 type Tile struct {
-	Weight int
+	Weight      int
+	ThreatLevel int
 }
 
 type Tiles []Tile
 
 type TileMap []Tiles
+
+type MapRender struct {
+	Topology string
+	Threat   string
+}
 
 func createEmptyTileMap(size int) TileMap {
 	tMap := make(TileMap, size)
@@ -69,6 +76,7 @@ func CreateRandomTileMap(config Config) TileMap {
 				}
 			}
 			if len(weightArr) == 0 {
+				//todo: add water tiles (negative values)
 				weightArr = append(weightArr, r.Intn(config.maxTileWeight))
 			}
 
@@ -77,7 +85,8 @@ func CreateRandomTileMap(config Config) TileMap {
 			weight := getRandom(weightArr)
 
 			tMap[i][j] = Tile{
-				Weight: weight,
+				Weight:      weight,
+				ThreatLevel: rand.Intn(config.maxThreatLevel),
 			}
 		}
 
@@ -86,23 +95,49 @@ func CreateRandomTileMap(config Config) TileMap {
 	return tMap
 }
 
-func (tile Tile) render() string {
-	defaultSymbol := "."
-	asciiSymbols := [...]string{",", ";", "!", "v", "l", "L", "F", "E", "$"}
-	if tile.Weight < 0 || tile.Weight > len(asciiSymbols)-1 {
-		return defaultSymbol
+func (tile Tile) renderTopology() string {
+	defaultMinSymbol := "."
+	defaultMaxSymbol := "$"
+	//todo: add water tiles (negative values)
+	asciiSymbols := [...]string{",", ";", "!", "v", "l", "L", "F", "E"}
+	if tile.Weight < 0 {
+		return defaultMinSymbol
+	}
+
+	if tile.Weight > len(asciiSymbols)-1 {
+		return defaultMaxSymbol
 	}
 
 	return asciiSymbols[tile.Weight]
 }
 
-func (tilesMap TileMap) RenderedMap() string {
-	str := ""
+func (tile Tile) renderThreat() string {
+	defaultMinSymbol := "."
+	defaultMaxSymbol := "!"
+	asciiSymbols := [...]string{".", ";", "!"}
+	if tile.ThreatLevel < 0 {
+		return defaultMinSymbol
+	}
+
+	if tile.ThreatLevel > len(asciiSymbols)-1 {
+		return defaultMaxSymbol
+	}
+
+	return asciiSymbols[tile.ThreatLevel]
+}
+
+func (tilesMap TileMap) RenderedMap() (mr MapRender) {
 	for _, tiles := range tilesMap {
 		for _, tile := range tiles {
-			str += tile.render()
+			mr.Topology += tile.renderTopology()
+			mr.Threat += tile.renderThreat()
 		}
-		str += "\n"
+		mr.Topology += "\n"
+		mr.Threat += "\n"
 	}
-	return str
+	return mr
+}
+
+func (mr MapRender) convertRenderedMapToString() string {
+	return fmt.Sprintf("Topology:\n%s\nThreat:\n%s", mr.Topology, mr.Threat)
 }
