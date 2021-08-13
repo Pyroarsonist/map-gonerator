@@ -2,22 +2,29 @@ package main
 
 import (
 	"fmt"
+	"github.com/Pyroarsonist/map-gonerator/helpers"
 	"math/rand"
-	"time"
 )
 
 type Tile struct {
-	Weight      int
-	ThreatLevel int
+	weight              int
+	threatLevel         int
+	heroPresence        bool
+	destinationPresence bool
 }
 
 type Tiles []Tile
 
 type TileMap []Tiles
 
+type TileCoordinate struct {
+	width  int
+	height int
+}
+
 type MapRender struct {
-	Topology string
-	Threat   string
+	topology string
+	threat   string
 }
 
 func createEmptyTileMap(size int) TileMap {
@@ -30,8 +37,7 @@ func createEmptyTileMap(size int) TileMap {
 }
 
 func CreateRandomTileMap(config Config) TileMap {
-	s := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(s)
+	r := helpers.GetRandomGenerator()
 
 	tMap := createEmptyTileMap(config.size)
 
@@ -43,28 +49,28 @@ func CreateRandomTileMap(config Config) TileMap {
 			n x
 			*/
 			if i > 0 {
-				neighbours = append(neighbours, tMap[i-1][j].Weight)
+				neighbours = append(neighbours, tMap[i-1][j].weight)
 			}
 			/**
 			. n .
 			. x
 			*/
 			if j > 0 {
-				neighbours = append(neighbours, tMap[i][j-1].Weight)
+				neighbours = append(neighbours, tMap[i][j-1].weight)
 			}
 			/**
 			n . .
 			. x
 			*/
 			if i > 0 && j > 0 {
-				neighbours = append(neighbours, tMap[i-1][j-1].Weight)
+				neighbours = append(neighbours, tMap[i-1][j-1].weight)
 			}
 			/**
 			. . n
 			. x
 			*/
 			if i < config.size-1 && j > 0 {
-				neighbours = append(neighbours, tMap[i+1][j-1].Weight)
+				neighbours = append(neighbours, tMap[i+1][j-1].weight)
 			}
 
 			var weightArr []int
@@ -80,13 +86,13 @@ func CreateRandomTileMap(config Config) TileMap {
 				weightArr = append(weightArr, r.Intn(config.maxTileWeight))
 			}
 
-			makeUnique(&weightArr)
+			helpers.MakeUnique(&weightArr)
 
-			weight := getRandom(weightArr)
+			weight := helpers.GetRandomItem(weightArr)
 
 			tMap[i][j] = Tile{
-				Weight:      weight,
-				ThreatLevel: rand.Intn(config.maxThreatLevel),
+				weight:      weight,
+				threatLevel: rand.Intn(config.maxThreatLevel),
 			}
 		}
 
@@ -96,48 +102,70 @@ func CreateRandomTileMap(config Config) TileMap {
 }
 
 func (tile Tile) renderTopology() string {
+	if tile.heroPresence {
+		return "X"
+	}
+	if tile.destinationPresence {
+		return "D"
+	}
 	defaultMinSymbol := "."
 	defaultMaxSymbol := "$"
 	//todo: add water tiles (negative values)
 	asciiSymbols := [...]string{",", ";", "!", "v", "l", "L", "F", "E"}
-	if tile.Weight < 0 {
+	if tile.weight < 0 {
 		return defaultMinSymbol
 	}
 
-	if tile.Weight > len(asciiSymbols)-1 {
+	if tile.weight > len(asciiSymbols)-1 {
 		return defaultMaxSymbol
 	}
 
-	return asciiSymbols[tile.Weight]
+	return asciiSymbols[tile.weight]
 }
 
 func (tile Tile) renderThreat() string {
+	if tile.heroPresence {
+		return "X"
+	}
+	if tile.destinationPresence {
+		return "D"
+	}
 	defaultMinSymbol := "."
 	defaultMaxSymbol := "!"
 	asciiSymbols := [...]string{".", ";", "!"}
-	if tile.ThreatLevel < 0 {
+	if tile.threatLevel < 0 {
 		return defaultMinSymbol
 	}
 
-	if tile.ThreatLevel > len(asciiSymbols)-1 {
+	if tile.threatLevel > len(asciiSymbols)-1 {
 		return defaultMaxSymbol
 	}
 
-	return asciiSymbols[tile.ThreatLevel]
+	return asciiSymbols[tile.threatLevel]
 }
 
-func (tilesMap TileMap) RenderedMap() (mr MapRender) {
-	for _, tiles := range tilesMap {
+func (tileMap TileMap) RenderedMap() (mr MapRender) {
+	for _, tiles := range tileMap {
 		for _, tile := range tiles {
-			mr.Topology += tile.renderTopology()
-			mr.Threat += tile.renderThreat()
+			mr.topology += tile.renderTopology()
+			mr.threat += tile.renderThreat()
 		}
-		mr.Topology += "\n"
-		mr.Threat += "\n"
+		mr.topology += "\n"
+		mr.threat += "\n"
 	}
 	return mr
 }
 
 func (mr MapRender) convertRenderedMapToString() string {
-	return fmt.Sprintf("Topology:\n%s\nThreat:\n%s", mr.Topology, mr.Threat)
+	return fmt.Sprintf("topology:\n%s\nThreat:\n%s", mr.topology, mr.threat)
+}
+
+func (tileMap TileMap) GetRandomCoordinate() TileCoordinate {
+	r := helpers.GetRandomGenerator()
+	//todo: maybe refactor tilemap to data and size
+	size := len(tileMap[0])
+	return TileCoordinate{
+		width:  r.Intn(size),
+		height: r.Intn(size),
+	}
 }
