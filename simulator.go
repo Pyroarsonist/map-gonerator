@@ -46,8 +46,8 @@ func simulateTrip(tileMap TileMap, config Config) {
 }
 
 func (trip Trip) cleanupTrip(tileMap TileMap) {
-	tileMap[trip.hero.coordinate.height][trip.hero.coordinate.width].isHero = true
-	tileMap[trip.destination.height][trip.destination.width].isDestination = true
+	tileMap[trip.hero.coordinate.height][trip.hero.coordinate.width].setHeroPresence()
+	tileMap[trip.destination.height][trip.destination.width].setDestinationPresence()
 
 }
 

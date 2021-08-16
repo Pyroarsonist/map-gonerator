@@ -109,3 +109,13 @@ func (tileMap TileMap) GetRandomCoordinate() TileCoordinate {
 		height: r.Intn(size),
 	}
 }
+
+func (tile Tile) setHeroPresence() {
+	tile.isHero = true
+	tile.threatLevel = 0
+}
+
+func (tile Tile) setDestinationPresence() {
+	tile.isDestination = true
+	tile.threatLevel = 0
+}
