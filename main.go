@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 )
 
 func main() {
-	fmt.Println("Generating random tiles")
-
 	config := LoadConfig()
+
+	if config.version {
+		viewVersion()
+		return
+	}
 
 	tileMap := CreateRandomTileMap(config)
 	renderedMapString := tileMap.RenderedMap().convertRenderedMapToString()
@@ -18,4 +22,12 @@ func main() {
 		printToConsole(renderedMapString)
 		simulateTrip(tileMap, config)
 	}
+}
+
+func viewVersion() {
+	version, err := ioutil.ReadFile("version.txt")
+	if err != nil {
+		panic("failed opening version file")
+	}
+	fmt.Printf("Version %s\n", version)
 }

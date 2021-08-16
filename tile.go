@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Pyroarsonist/map-gonerator/helpers"
 	"math/rand"
 )
@@ -38,6 +39,8 @@ func createEmptyTileMap(size int) TileMap {
 }
 
 func CreateRandomTileMap(config Config) TileMap {
+	fmt.Println("Generating random tiles")
+
 	r := helpers.GetRandomGenerator()
 
 	tMap := createEmptyTileMap(config.size)
