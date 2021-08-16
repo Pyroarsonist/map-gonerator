@@ -18,14 +18,21 @@ type Trip struct {
 
 func (tileMap TileMap) createRandomTrip(maxHP int) Trip {
 	r := helpers.GetRandomGenerator()
+	heroCoordinate := tileMap.GetRandomCoordinate()
+	destinationCoordinate := tileMap.GetRandomCoordinate()
+	for {
+		if !(destinationCoordinate.width == heroCoordinate.width && destinationCoordinate.height == heroCoordinate.height) {
+			break
+		}
+		destinationCoordinate = tileMap.GetRandomCoordinate()
+	}
 
-	//todo: hero and destination coords should not be the same
 	return Trip{
 		hero: Hero{
-			coordinate: tileMap.GetRandomCoordinate(),
+			coordinate: heroCoordinate,
 			hp:         r.Intn(maxHP),
 		},
-		destination: tileMap.GetRandomCoordinate(),
+		destination: destinationCoordinate,
 		day:         0,
 	}
 }
@@ -39,8 +46,8 @@ func simulateTrip(tileMap TileMap, config Config) {
 }
 
 func (trip Trip) cleanupTrip(tileMap TileMap) {
-	tileMap[trip.hero.coordinate.height][trip.hero.coordinate.width].heroPresence = true
-	tileMap[trip.destination.height][trip.destination.width].destinationPresence = true
+	tileMap[trip.hero.coordinate.height][trip.hero.coordinate.width].isHero = true
+	tileMap[trip.destination.height][trip.destination.width].isDestination = true
 
 }
 
