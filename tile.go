@@ -6,10 +6,12 @@ import (
 )
 
 type Tile struct {
-	weight        int
-	threatLevel   int
-	isHero        bool
-	isDestination bool
+	weight              int
+	threatLevel         int
+	isHeroStartLocation bool
+	isDestination       bool
+	isHeroTrace         bool
+	isHeroDeath         bool
 }
 
 type Tiles []Tile
@@ -110,12 +112,21 @@ func (tileMap TileMap) GetRandomCoordinate() TileCoordinate {
 	}
 }
 
-func (tile Tile) setHeroPresence() {
-	tile.isHero = true
+func (tile *Tile) setHeroStartLocation() {
+	tile.isHeroStartLocation = true
 	tile.threatLevel = 0
 }
 
-func (tile Tile) setDestinationPresence() {
+func (tile *Tile) setDestinationPresence() {
 	tile.isDestination = true
 	tile.threatLevel = 0
+}
+
+func (tile *Tile) setHeroTrace() {
+	tile.isHeroTrace = true
+	tile.threatLevel = 0
+}
+
+func (tile *Tile) setHeroDeath() {
+	tile.isHeroDeath = true
 }

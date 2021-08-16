@@ -14,6 +14,7 @@ type Trip struct {
 	hero        Hero
 	destination TileCoordinate
 	day         int
+	tileMap     TileMap
 }
 
 func (tileMap TileMap) createRandomTrip(maxHP int) Trip {
@@ -34,6 +35,7 @@ func (tileMap TileMap) createRandomTrip(maxHP int) Trip {
 		},
 		destination: destinationCoordinate,
 		day:         0,
+		tileMap:     tileMap,
 	}
 }
 
@@ -42,18 +44,32 @@ func simulateTrip(tileMap TileMap, config Config) {
 
 	trip := tileMap.createRandomTrip(config.maxHP)
 
-	trip.renderTrip(tileMap)
+	trip.start()
 }
 
-func (trip Trip) cleanupTrip(tileMap TileMap) {
-	tileMap[trip.hero.coordinate.height][trip.hero.coordinate.width].setHeroPresence()
+func (trip *Trip) cleanupTrip() {
+	tileMap := trip.tileMap
+	tileMap[trip.hero.coordinate.height][trip.hero.coordinate.width].setHeroStartLocation()
 	tileMap[trip.destination.height][trip.destination.width].setDestinationPresence()
 
 }
 
-func (trip Trip) renderTrip(tileMap TileMap) {
-	trip.cleanupTrip(tileMap)
-	renderedMapString := tileMap.RenderedMap().convertRenderedMapToString()
+func (trip *Trip) start() {
+	trip.cleanupTrip()
+	renderedMapString := trip.tileMap.RenderedMap().convertRenderedMapToString()
 	printToConsole(renderedMapString)
 
+	fmt.Println("Starting trip")
+	trip.simulateWithAlgorithm(Greedy)
+	renderedMapString = trip.tileMap.RenderedMap().convertRenderedMapToString()
+	printToConsole(renderedMapString)
+	fmt.Println("Days gone:", trip.day)
+	fmt.Println("HP remaining:", trip.hero.hp)
+}
+
+func (hero *Hero) hpLoss(value int) {
+	hero.hp -= value
+	if hero.hp < 0 {
+		hero.hp = 0
+	}
 }

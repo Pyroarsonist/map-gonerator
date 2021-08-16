@@ -18,14 +18,30 @@ func getColours() (func(a ...interface{}) string, func(a ...interface{}) string,
 	return white, cyan, green, yellow, red
 }
 
-func (tile Tile) renderTopology() string {
-	_, cyan, green, yellow, red := getColours()
-	if tile.isHero {
-		return cyan("X")
+func (tile Tile) renderGeneral() (ok bool, s string) {
+	_, cyan, _, _, _ := getColours()
+	if tile.isHeroStartLocation {
+		return true, color.New(color.FgHiYellow, color.ReverseVideo, color.Bold).Sprint("H")
 	}
 	if tile.isDestination {
-		return cyan("D")
+		return true, color.New(color.FgHiBlue, color.ReverseVideo, color.Bold).Sprint("D")
 	}
+	if tile.isHeroDeath {
+		return true, color.New(color.FgHiRed, color.ReverseVideo, color.Bold).Sprint("✞")
+	}
+	if tile.isHeroTrace {
+		return true, cyan("/")
+	}
+	return false, s
+}
+
+func (tile Tile) renderTopology() string {
+	ok, r := tile.renderGeneral()
+	if ok {
+		return r
+	}
+
+	_, _, green, yellow, red := getColours()
 	defaultMinSymbol := green(".")
 	defaultMaxSymbol := red("$")
 	//todo: add water tiles (negative values)
@@ -50,13 +66,12 @@ func (tile Tile) renderTopology() string {
 }
 
 func (tile Tile) renderThreat() string {
-	_, cyan, green, yellow, red := getColours()
-	if tile.isHero {
-		return cyan("X")
+	ok, r := tile.renderGeneral()
+	if ok {
+		return r
 	}
-	if tile.isDestination {
-		return cyan("D")
-	}
+
+	_, _, green, yellow, red := getColours()
 	defaultMinSymbol := green(".")
 	defaultMaxSymbol := red("!")
 	asciiSymbols := [...]string{".", ";", "!"}
@@ -110,7 +125,12 @@ func printToFile(str string, fileName string) {
 		log.Fatal(err)
 	}
 
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(f)
 
 	_, err = f.WriteString(str)
 

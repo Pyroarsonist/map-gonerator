@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/fatih/color"
 )
 
 type Config struct {
@@ -21,6 +22,10 @@ func LoadConfig() (c Config) {
 	flag.IntVar(&c.maxHP, "hp", 15, "Maximum hp")
 	flag.StringVar(&c.fileOutput, "out", "", "Should save to file")
 	flag.Parse()
+
+	if c.fileOutput != "" {
+		color.NoColor = true
+	}
 
 	return
 }
