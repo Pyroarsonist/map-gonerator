@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Pyroarsonist/map-gonerator/helpers"
+	"github.com/fatih/color"
 	"math/rand"
 	"strings"
 )
@@ -102,15 +103,26 @@ func CreateRandomTileMap(config Config) TileMap {
 	return tMap
 }
 
+func getColours() (func(a ...interface{}) string, func(a ...interface{}) string, func(a ...interface{}) string, func(a ...interface{}) string, func(a ...interface{}) string) {
+	white := color.New(color.FgWhite, color.Faint).SprintFunc()
+	cyan := color.New(color.FgHiCyan, color.ReverseVideo, color.Bold).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+
+	return white, cyan, green, yellow, red
+}
+
 func (tile Tile) renderTopology() string {
+	_, cyan, green, yellow, red := getColours()
 	if tile.heroPresence {
-		return "X"
+		return cyan("X")
 	}
 	if tile.destinationPresence {
-		return "D"
+		return cyan("D")
 	}
-	defaultMinSymbol := "."
-	defaultMaxSymbol := "$"
+	defaultMinSymbol := green(".")
+	defaultMaxSymbol := red("$")
 	//todo: add water tiles (negative values)
 	asciiSymbols := [...]string{",", ";", "!", "v", "l", "L", "F", "E"}
 	if tile.weight < 0 {
@@ -121,18 +133,27 @@ func (tile Tile) renderTopology() string {
 		return defaultMaxSymbol
 	}
 
-	return asciiSymbols[tile.weight]
+	colorFunc := green
+	if tile.weight > 2 {
+		colorFunc = yellow
+	}
+	if tile.weight > 4 {
+		colorFunc = red
+	}
+
+	return colorFunc(asciiSymbols[tile.weight])
 }
 
 func (tile Tile) renderThreat() string {
+	_, cyan, green, yellow, red := getColours()
 	if tile.heroPresence {
-		return "X"
+		return cyan("X")
 	}
 	if tile.destinationPresence {
-		return "D"
+		return cyan("D")
 	}
-	defaultMinSymbol := "."
-	defaultMaxSymbol := "!"
+	defaultMinSymbol := green(".")
+	defaultMaxSymbol := red("!")
 	asciiSymbols := [...]string{".", ";", "!"}
 	if tile.threatLevel < 0 {
 		return defaultMinSymbol
@@ -142,25 +163,34 @@ func (tile Tile) renderThreat() string {
 		return defaultMaxSymbol
 	}
 
-	return asciiSymbols[tile.threatLevel]
+	colorFunc := green
+	if tile.weight > 0 {
+		colorFunc = yellow
+	}
+	if tile.weight > 1 {
+		colorFunc = red
+	}
+
+	return colorFunc(asciiSymbols[tile.threatLevel])
 }
 
 func (tileMap TileMap) RenderedMap() (mr MapRender) {
+	white, _, _, _, _ := getColours()
 	for _, tileRow := range tileMap {
-		mr.topology += strings.Repeat(".-", len(tileRow)) + ".\n"
-		mr.threat += strings.Repeat(".-", len(tileRow)) + ".\n"
+		mr.topology += white(strings.Repeat(".-", len(tileRow)) + ".\n")
+		mr.threat += white(strings.Repeat(".-", len(tileRow)) + ".\n")
 
 		for _, tile := range tileRow {
-			mr.topology += "|"
-			mr.threat += "|"
+			mr.topology += white("|")
+			mr.threat += white("|")
 			mr.topology += tile.renderTopology()
 			mr.threat += tile.renderThreat()
 		}
-		mr.topology += "|\n"
-		mr.threat += "|\n"
+		mr.topology += white("|\n")
+		mr.threat += white("|\n")
 	}
-	mr.topology += strings.Repeat(".-", len(tileMap)) + ".\n"
-	mr.threat += strings.Repeat(".-", len(tileMap)) + ".\n"
+	mr.topology += white(strings.Repeat(".-", len(tileMap)) + ".\n")
+	mr.threat += white(strings.Repeat(".-", len(tileMap)) + ".\n")
 	return mr
 }
 
