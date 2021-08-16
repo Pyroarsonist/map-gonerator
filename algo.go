@@ -11,9 +11,9 @@ const (
 func (trip *Trip) simulateWithAlgorithm(algoName AlgorithmName) {
 	destination := trip.destination
 	hero := &trip.hero
-	for {
-		trip.day += 1
+	trip.day = 1
 
+	for {
 		same, nextCoordinate := getNextCoordinate(algoName, destination, hero.coordinate)
 		if same {
 			return
@@ -23,6 +23,7 @@ func (trip *Trip) simulateWithAlgorithm(algoName AlgorithmName) {
 		newTile := &trip.tileMap[nextCoordinate.height][nextCoordinate.width]
 		hero.hpLoss(newTile.threatLevel)
 		newTile.setHeroTrace()
+		trip.day += newTile.passability
 		if hero.hp == 0 {
 			newTile.setHeroDeath()
 			return

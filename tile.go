@@ -6,7 +6,7 @@ import (
 )
 
 type Tile struct {
-	weight              int
+	passability         int
 	threatLevel         int
 	isHeroStartLocation bool
 	isDestination       bool
@@ -50,49 +50,49 @@ func CreateRandomTileMap(config Config) TileMap {
 			n x
 			*/
 			if i > 0 {
-				neighbours = append(neighbours, tMap[i-1][j].weight)
+				neighbours = append(neighbours, tMap[i-1][j].passability)
 			}
 			/**
 			. n .
 			. x
 			*/
 			if j > 0 {
-				neighbours = append(neighbours, tMap[i][j-1].weight)
+				neighbours = append(neighbours, tMap[i][j-1].passability)
 			}
 			/**
 			n . .
 			. x
 			*/
 			if i > 0 && j > 0 {
-				neighbours = append(neighbours, tMap[i-1][j-1].weight)
+				neighbours = append(neighbours, tMap[i-1][j-1].passability)
 			}
 			/**
 			. . n
 			. x
 			*/
 			if i < config.size-1 && j > 0 {
-				neighbours = append(neighbours, tMap[i+1][j-1].weight)
+				neighbours = append(neighbours, tMap[i+1][j-1].passability)
 			}
 
-			var weightArr []int
+			var passabilityArr []int
 			for n := range neighbours {
 				for w := n - config.maxHeightDiff; w <= n+config.maxHeightDiff; w++ {
 					if w > 0 {
-						weightArr = append(weightArr, w)
+						passabilityArr = append(passabilityArr, w)
 					}
 				}
 			}
-			if len(weightArr) == 0 {
+			if len(passabilityArr) == 0 {
 				//todo: add water tiles (negative values)
-				weightArr = append(weightArr, r.Intn(config.maxTileWeight))
+				passabilityArr = append(passabilityArr, r.Intn(config.maxTilePassability))
 			}
 
-			helpers.MakeUnique(&weightArr)
+			helpers.MakeUnique(&passabilityArr)
 
-			weight := helpers.GetRandomItem(weightArr)
+			passability := helpers.GetRandomItem(passabilityArr)
 
 			tMap[i][j] = Tile{
-				weight:      weight,
+				passability: passability,
 				threatLevel: rand.Intn(config.maxThreatLevel),
 			}
 		}

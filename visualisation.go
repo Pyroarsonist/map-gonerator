@@ -46,23 +46,23 @@ func (tile Tile) renderTopology() string {
 	defaultMaxSymbol := red("$")
 	//todo: add water tiles (negative values)
 	asciiSymbols := [...]string{",", ";", "!", "v", "l", "L", "F", "E"}
-	if tile.weight < 0 {
+	if tile.passability < 0 {
 		return defaultMinSymbol
 	}
 
-	if tile.weight > len(asciiSymbols)-1 {
+	if tile.passability > len(asciiSymbols)-1 {
 		return defaultMaxSymbol
 	}
 
 	colorFunc := green
-	if tile.weight > 2 {
+	if tile.passability > 2 {
 		colorFunc = yellow
 	}
-	if tile.weight > 4 {
+	if tile.passability > 4 {
 		colorFunc = red
 	}
 
-	return colorFunc(asciiSymbols[tile.weight])
+	return colorFunc(asciiSymbols[tile.passability])
 }
 
 func (tile Tile) renderThreat() string {
@@ -84,10 +84,10 @@ func (tile Tile) renderThreat() string {
 	}
 
 	colorFunc := green
-	if tile.weight > 0 {
+	if tile.passability > 0 {
 		colorFunc = yellow
 	}
-	if tile.weight > 1 {
+	if tile.passability > 1 {
 		colorFunc = red
 	}
 
