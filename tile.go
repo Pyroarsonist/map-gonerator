@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Pyroarsonist/map-gonerator/helpers"
 	"math/rand"
+	"strings"
 )
 
 type Tile struct {
@@ -145,19 +146,26 @@ func (tile Tile) renderThreat() string {
 }
 
 func (tileMap TileMap) RenderedMap() (mr MapRender) {
-	for _, tiles := range tileMap {
-		for _, tile := range tiles {
+	for _, tileRow := range tileMap {
+		mr.topology += strings.Repeat(".-", len(tileRow)) + ".\n"
+		mr.threat += strings.Repeat(".-", len(tileRow)) + ".\n"
+
+		for _, tile := range tileRow {
+			mr.topology += "|"
+			mr.threat += "|"
 			mr.topology += tile.renderTopology()
 			mr.threat += tile.renderThreat()
 		}
-		mr.topology += "\n"
-		mr.threat += "\n"
+		mr.topology += "|\n"
+		mr.threat += "|\n"
 	}
+	mr.topology += strings.Repeat(".-", len(tileMap)) + ".\n"
+	mr.threat += strings.Repeat(".-", len(tileMap)) + ".\n"
 	return mr
 }
 
 func (mr MapRender) convertRenderedMapToString() string {
-	return fmt.Sprintf("topology:\n%s\nThreat:\n%s", mr.topology, mr.threat)
+	return fmt.Sprintf("Topology:\n%s\nThreat:\n%s", mr.topology, mr.threat)
 }
 
 func (tileMap TileMap) GetRandomCoordinate() TileCoordinate {
